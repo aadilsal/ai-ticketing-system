@@ -40,7 +40,7 @@ export const getTickets = async (req, res) => {
     const user = req.user;
     let tickets = [];
     if (user.role !== "user") {
-      tickets = Ticket.find({})
+      tickets = await Ticket.find({})
         .populate("assignedTo", ["email", "_id"])
         .sort({ createdAt: -1 });
     } else {
@@ -48,7 +48,7 @@ export const getTickets = async (req, res) => {
         .select("title description status createdAt")
         .sort({ createdAt: -1 });
     }
-    return res.status(200).json(tickets);
+    return res.status(200).json({ tickets });
   } catch (error) {
     console.error("Error getting tickets", error.message);
     return res.status(500).json({ message: "Internal server error" });
@@ -61,12 +61,12 @@ export const getTicket = async (req, res) => {
     let ticket;
 
     if (user.role !== "user") {
-      ticket = Ticket.findById(req.params.id).populate("assignedTo", [
+      ticket = await Ticket.findById(req.params.id).populate("assignedTo", [
         "email",
         "_id",
       ]);
     } else {
-      ticket = Ticket.findOne({
+      ticket = await Ticket.findOne({
         createdBy: user._id,
         _id: req.params.id,
       }).select("title description status createdAt");

@@ -7,7 +7,7 @@ import user from "../models/user.js";
 export const signup = async (req, res) => {
   const { email, password, skills = [] } = req.body;
   try {
-    const hashed = brcypt.hash(password, 10);
+    const hashed = await brcypt.hash(password, 10);
     const user = await User.create({ email, password: hashed, skills });
 
     //inngest events occuring
@@ -25,20 +25,20 @@ export const signup = async (req, res) => {
 
     res.json({ user, token });
   } catch (error) {
-    res.status(500).json({ error: "SIGN UP FAILED", details: error.message });
+    res.status(500).json({ message: "SIGN UP FAILED", details: error.message });
   }
 };
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = User.findOne({ email });
+    const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ error: "USER NOT FOUND" });
+      return res.status(404).json({ message: "USER NOT FOUND" });
     }
     const isMatch = await brcypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ error: "PASSWORD DOESNT MATCH" });
+      return res.status(401).json({ message: "PASSWORD DOESNT MATCH" });
     }
     const token = jwt.sign(
       { _id: user._id, role: user.role },
@@ -47,7 +47,7 @@ export const login = async (req, res) => {
 
     res.json({ user, token });
   } catch (error) {
-    res.status(500).json({ error: "LOGIN FAILED", details: error.message });
+    res.status(500).json({ message: "LOGIN FAILED", details: error.message });
   }
 };
 
